@@ -1,0 +1,15 @@
+{
+  "name": "snake-june",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Mykhailo Miroshnikov",
+  "license": "UNLICENCED",
+  "devDependencies": {
+    "live-server": "git+https://github.com/tapio/live-server.git#ad22544",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "serve": "live-server dist/"
+  }
+}
