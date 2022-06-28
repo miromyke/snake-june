@@ -1,10 +1,15 @@
 import { partition } from "./partition";
-import { Location } from "./types";
+import { Axis, Direction, Location } from "./types";
+import { isOppositeDirections } from "./utils";
 
-export const move = (snake: Location[]): Location[] => {
+function validateSnake(snake: Location[]) {
   if (snake.length < 2) {
     throw new Error("Could not move a snake of length less than 2");
   }
+}
+
+export const moveInCurrentDirection = (snake: Location[]): Location[] => {
+  validateSnake(snake);
 
   const partitions = partition(snake);
   const lastPartition = partitions[partitions.length - 1];
@@ -15,7 +20,7 @@ export const move = (snake: Location[]): Location[] => {
     y: axis === "y" ? prevHeadLocation.y + direction : prevHeadLocation.y,
   };
 
-  const [first, ...nextSnake] = [
+  const [tail, ...nextSnake] = [
     ...partitions.slice(0, partitions.length - 1),
     {
       axis,
@@ -25,4 +30,36 @@ export const move = (snake: Location[]): Location[] => {
   ].flatMap(({ value }) => [...value]);
 
   return nextSnake;
+};
+
+export const moveInGivenDirection = (
+  snake: Location[],
+  axis: Axis,
+  direction: Direction
+): Location[] => {
+  validateSnake(snake);
+
+  const partitions = partition(snake);
+  const headPartition = partitions[partitions.length - 1];
+
+  if (headPartition.axis === axis) {
+    if (isOppositeDirections(headPartition.direction, direction)) {
+      throw new Error("Cannot move in the opposite direction");
+    }
+
+    if (headPartition.direction === direction) {
+      return moveInCurrentDirection(snake);
+    }
+  }
+
+  const [tail, ...nextSnake] = snake;
+
+  const head = nextSnake[nextSnake.length - 1];
+
+  const nextHead = {
+    x: axis === "x" ? head.x + direction : head.x,
+    y: axis === "y" ? head.y + direction : head.y,
+  };
+
+  return [...nextSnake, nextHead];
 };

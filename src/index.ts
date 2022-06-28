@@ -1,5 +1,6 @@
-import { move } from "./move";
-import { Location, State } from "./types";
+import { filter, fromEvent, interval, map, tap } from "rxjs";
+import { moveInGivenDirection } from "./move";
+import { Axis, Direction, Location } from "./types";
 
 const snake = [
   { x: 10, y: 10 },
@@ -50,7 +51,55 @@ function render(snake: Location[]) {
 }
 
 render(snake);
-let nextSnake = snake;
-setInterval(() => {
-  render((nextSnake = move(nextSnake)));
-}, 500);
+let nextSnake: Location[] = snake;
+let axis: Axis = "x";
+let direction: Direction = 1;
+
+interval(500).subscribe(() => {
+  render((nextSnake = moveInGivenDirection(nextSnake, axis, direction)));
+});
+
+fromEvent(document, "keydown")
+  .pipe(
+    filter((e: KeyboardEvent) => {
+      if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        return true;
+      }
+    }),
+    tap((e) => {
+      e.preventDefault();
+    }),
+    map((e) => e.key)
+  )
+  .subscribe((v) => {
+    switch (v) {
+      case "ArrowDown":
+        if (axis !== "x") {
+          break;
+        }
+        axis = "y";
+        direction = 1;
+        break;
+      case "ArrowUp":
+        if (axis !== "x") {
+          break;
+        }
+        axis = "y";
+        direction = -1;
+        break;
+      case "ArrowRight":
+        if (axis !== "y") {
+          break;
+        }
+        axis = "x";
+        direction = 1;
+        break;
+      case "ArrowLeft":
+        if (axis !== "y") {
+          break;
+        }
+        axis = "x";
+        direction = -1;
+        break;
+    }
+  });

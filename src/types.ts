@@ -16,8 +16,7 @@ export type Axis = "x" | "y";
 export interface Partition {
   value: Location[];
   axis: Axis;
-  direction: -1 | 1;
+  direction: Direction;
 }
 
-// 0 - straight, 1 - right, -1 - left
-export type Direction = 0 | 1 | -1;
+export type Direction = 1 | -1;

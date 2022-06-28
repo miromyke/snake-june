@@ -1,4 +1,4 @@
-import { Axis, Location, Partition } from "./types";
+import { Axis, Direction, Location, Partition } from "./types";
 
 export function partition(snake: Location[]) {
   let partitions: Partition[] = [];
@@ -18,7 +18,7 @@ export function partition(snake: Location[]) {
     }
 
     let axis: Axis;
-    let direction: -1 | 1;
+    let direction: Direction;
 
     const xDiff = location.x - prevLocation.x;
     if (xDiff === 0) {
