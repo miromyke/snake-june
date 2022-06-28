@@ -1,0 +1,47 @@
+​
+<html>
+  <head>
+    <title>Snake-June</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --mesh-size: 25;
+        --cell-size: 35px;
+        --main-bg: white;
+        --alt-bg: rgb(226, 255, 194);
+      }
+
+      .mesh {
+        display: grid;
+        margin: 0 auto;
+        width: calc(var(--mesh-size) * var(--cell-size));
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        border: 1px solid var(--alt-bg);
+      }
+      .mesh > div {
+        width: var(--cell-size);
+        height: var(--cell-size);
+        background-color: white;
+        padding: 4px;
+      }
+      .mesh > div:nth-child(2n) {
+        background-color: var(--alt-bg);
+      }
+
+      .mesh > div > div.occupied {
+        background-color: green;
+        border-radius: 3px;
+        width: 27px;
+        height: 27px;
+      }
+    </style>
+    <div id="root" class="mesh"></div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>
