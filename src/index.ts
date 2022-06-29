@@ -1,4 +1,14 @@
-import { filter, fromEvent, interval, map, tap } from "rxjs";
+import {
+  combineLatest,
+  map,
+  merge,
+  mergeAll,
+  scan,
+  startWith,
+  tap,
+} from "rxjs";
+import { directions$ } from "./directions";
+import { gameClock$ } from "./gameClock";
 import { moveInGivenDirection } from "./move";
 import { Axis, Direction, Location } from "./types";
 
@@ -50,56 +60,59 @@ function render(snake: Location[]) {
   }
 }
 
-render(snake);
-let nextSnake: Location[] = snake;
-let axis: Axis = "x";
-let direction: Direction = 1;
-
-interval(500).subscribe(() => {
-  render((nextSnake = moveInGivenDirection(nextSnake, axis, direction)));
-});
-
-fromEvent(document, "keydown")
-  .pipe(
-    filter((e: KeyboardEvent) => {
-      if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-        return true;
+const snake$ = merge(
+  gameClock$.pipe(
+    map((v) => {
+      if (v.pause) {
+        return { ...v, type: "pause" };
       }
-    }),
-    tap((e) => {
-      e.preventDefault();
-    }),
-    map((e) => e.key)
+
+      return { ...v, type: "tick" };
+    })
+  ),
+  directions$.pipe(map((v) => ({ ...v, type: "turn" })))
+).pipe(
+  scan(
+    (acc, action) => {
+      if (action.type === "tick") {
+        return {
+          ...acc,
+          snakeLocation: moveInGivenDirection(
+            acc.snakeLocation,
+            acc.axis,
+            acc.direction
+          ),
+        };
+      }
+
+      if (action.type === "turn") {
+        return {
+          ...acc,
+          direction: action.direction,
+          axis: action.axis,
+        };
+      }
+
+      return acc;
+    },
+    {
+      direction: 1,
+      axis: "x",
+      snakeLocation: [
+        { x: 10, y: 10 },
+        { x: 11, y: 10 },
+        { x: 12, y: 10 },
+        { x: 13, y: 10 },
+        { x: 14, y: 10 },
+      ],
+    } as { axis: Axis; direction: Direction; snakeLocation: Location[] }
   )
-  .subscribe((v) => {
-    switch (v) {
-      case "ArrowDown":
-        if (axis !== "x") {
-          break;
-        }
-        axis = "y";
-        direction = 1;
-        break;
-      case "ArrowUp":
-        if (axis !== "x") {
-          break;
-        }
-        axis = "y";
-        direction = -1;
-        break;
-      case "ArrowRight":
-        if (axis !== "y") {
-          break;
-        }
-        axis = "x";
-        direction = 1;
-        break;
-      case "ArrowLeft":
-        if (axis !== "y") {
-          break;
-        }
-        axis = "x";
-        direction = -1;
-        break;
-    }
-  });
+);
+
+const game$ = snake$.pipe(
+  tap((v) => {
+    render(v.snakeLocation);
+  })
+);
+
+game$.subscribe();
