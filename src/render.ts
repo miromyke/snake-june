@@ -14,7 +14,8 @@ export const createRenderer = (container: HTMLElement) => {
       new Array(meshSize ** 2).fill(null).map((_, idx) => {
         const meshNode = document.createElement("div");
         const xCoord = idx % meshSize;
-        const yCoord = Math.ceil(idx / meshSize);
+        const yCoord = Math.floor(idx / meshSize);
+
         const loc = locToStr({ x: xCoord, y: yCoord });
         meshNodes[loc] = meshNode;
 
@@ -35,6 +36,7 @@ export const createRenderer = (container: HTMLElement) => {
       acc[locToStr(location)] = true;
       return acc;
     }, {} as Record<string, boolean>);
+
     for (let i in snakeNodes) {
       snakeNodes[i].className = occupied[i] ? "occupied" : "";
     }

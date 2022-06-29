@@ -8,6 +8,13 @@ import { isValidTurn } from "./utils";
 
 const render = createRenderer(document.querySelector<HTMLDivElement>("#root"));
 
+const arrowKeyToDirection = (
+  key: string
+): { axis: Axis; direction: Direction } => ({
+  axis: ["ArrowDown", "ArrowUp"].includes(key) ? "y" : "x",
+  direction: ["ArrowLeft", "ArrowUp"].includes(key) ? -1 : 1,
+});
+
 const game$ = merge(
   gameClock$.pipe(map(({ tick }) => ({ payload: tick, type: "tick" }))),
   keyboardArrows$.pipe(map((arrowKey) => ({ payload: arrowKey, type: "turn" })))
@@ -15,18 +22,20 @@ const game$ = merge(
   scan<
     { type: string; payload: string | number },
     {
-      currentDirection: { axis: Axis; direction: Direction };
-      directionCandidate: { axis: Axis; direction: Direction } | null;
+      prevDirection: { axis: Axis; direction: Direction } | null;
+      directionQueue: { axis: Axis; direction: Direction }[];
       snakeLocation: Location[];
     }
   >(
     (acc, action) => {
       if (action.type === "tick") {
-        if (!acc.directionCandidate) {
+        const [nextDirection, ...nextDirectionQueue] = acc.directionQueue;
+
+        if (!nextDirection) {
           const nextSnakeLocation = moveInGivenDirection(
             acc.snakeLocation,
-            acc.currentDirection.axis,
-            acc.currentDirection.direction
+            acc.prevDirection.axis,
+            acc.prevDirection.direction
           );
           return {
             ...acc,
@@ -34,50 +43,54 @@ const game$ = merge(
           };
         }
 
-        const committedDirection = isValidTurn(
-          acc.currentDirection,
-          acc.directionCandidate
-        )
-          ? acc.directionCandidate
-          : acc.currentDirection;
+        if (!isValidTurn(acc.prevDirection, nextDirection)) {
+          const nextSnakeLocation = moveInGivenDirection(
+            acc.snakeLocation,
+            acc.prevDirection.axis,
+            acc.prevDirection.direction
+          );
+          return {
+            ...acc,
+            snakeLocation: nextSnakeLocation,
+            directionQueue: [],
+          };
+        }
 
         const nextSnakeLocation = moveInGivenDirection(
           acc.snakeLocation,
-          committedDirection.axis,
-          committedDirection.direction
+          nextDirection.axis,
+          nextDirection.direction
         );
+
         return {
           ...acc,
-          currentDirection: committedDirection,
           snakeLocation: nextSnakeLocation,
-          directionCandidate: null,
+          prevDirection: nextDirection,
+          directionQueue: nextDirectionQueue,
         };
       }
 
       if (action.type === "turn") {
         return {
           ...acc,
-          directionCandidate: {
-            axis: ["ArrowDown", "ArrowUp"].includes(action.payload as string)
-              ? "y"
-              : "x",
-            direction: ["ArrowLeft", "ArrowUp"].includes(
-              action.payload as string
-            )
-              ? -1
-              : 1,
-          },
+          directionQueue:
+            acc.directionQueue.length < 3
+              ? [
+                  ...acc.directionQueue,
+                  arrowKeyToDirection(action.payload as string),
+                ]
+              : acc.directionQueue,
         };
       }
 
       return acc;
     },
     {
-      currentDirection: {
+      prevDirection: {
         direction: 1,
         axis: "x",
       },
-      directionCandidate: null,
+      directionQueue: [],
       snakeLocation: [
         { x: 10, y: 10 },
         { x: 11, y: 10 },
