@@ -1,103 +1,83 @@
-import {
-  combineLatest,
-  map,
-  merge,
-  mergeAll,
-  scan,
-  startWith,
-  tap,
-} from "rxjs";
-import { directions$ } from "./directions";
+import { map, merge, pluck, scan, tap } from "rxjs";
+import { keyboardArrows$ } from "./directions";
 import { gameClock$ } from "./gameClock";
 import { moveInGivenDirection } from "./move";
+import { createRenderer } from "./render";
 import { Axis, Direction, Location } from "./types";
+import { isValidTurn } from "./utils";
 
-const snake = [
-  { x: 10, y: 10 },
-  { x: 11, y: 10 },
-  { x: 12, y: 10 },
-  { x: 13, y: 10 },
-  { x: 14, y: 10 },
-];
+const render = createRenderer(document.querySelector<HTMLDivElement>("#root"));
 
-const locToStr = (loc: Location) => `${loc.x}-${loc.y}`;
-
-const meshSize = 25;
-const container = document.querySelector("#root");
-
-let initialRender = true;
-const meshNodes: Record<string, HTMLDivElement> = {};
-const snakeNodes: Record<string, HTMLDivElement> = {};
-
-function render(snake: Location[]) {
-  if (initialRender) {
-    new Array(meshSize ** 2).fill(null).map((_, idx) => {
-      const meshNode = document.createElement("div");
-      const xCoord = idx % meshSize;
-      const yCoord = Math.ceil(idx / meshSize);
-      const loc = locToStr({ x: xCoord, y: yCoord });
-      meshNodes[loc] = meshNode;
-
-      const snakeNode = document.createElement("div");
-      snakeNodes[loc] = snakeNode;
-      meshNode.appendChild(snakeNode);
-
-      container.appendChild(meshNode);
-    });
-
-    initialRender = false;
-
-    render(snake);
-    return;
-  }
-
-  const occupied = snake.reduce((acc, location) => {
-    acc[locToStr(location)] = true;
-    return acc;
-  }, {} as Record<string, boolean>);
-  for (let i in snakeNodes) {
-    snakeNodes[i].className = occupied[i] ? "occupied" : "";
-  }
-}
-
-const snake$ = merge(
-  gameClock$.pipe(
-    map((v) => {
-      if (v.pause) {
-        return { ...v, type: "pause" };
-      }
-
-      return { ...v, type: "tick" };
-    })
-  ),
-  directions$.pipe(map((v) => ({ ...v, type: "turn" })))
+const game$ = merge(
+  gameClock$.pipe(map(({ tick }) => ({ payload: tick, type: "tick" }))),
+  keyboardArrows$.pipe(map((arrowKey) => ({ payload: arrowKey, type: "turn" })))
 ).pipe(
-  scan(
+  scan<
+    { type: string; payload: string | number },
+    {
+      currentDirection: { axis: Axis; direction: Direction };
+      directionCandidate: { axis: Axis; direction: Direction } | null;
+      snakeLocation: Location[];
+    }
+  >(
     (acc, action) => {
       if (action.type === "tick") {
+        if (!acc.directionCandidate) {
+          const nextSnakeLocation = moveInGivenDirection(
+            acc.snakeLocation,
+            acc.currentDirection.axis,
+            acc.currentDirection.direction
+          );
+          return {
+            ...acc,
+            snakeLocation: nextSnakeLocation,
+          };
+        }
+
+        const committedDirection = isValidTurn(
+          acc.currentDirection,
+          acc.directionCandidate
+        )
+          ? acc.directionCandidate
+          : acc.currentDirection;
+
+        const nextSnakeLocation = moveInGivenDirection(
+          acc.snakeLocation,
+          committedDirection.axis,
+          committedDirection.direction
+        );
         return {
           ...acc,
-          snakeLocation: moveInGivenDirection(
-            acc.snakeLocation,
-            acc.axis,
-            acc.direction
-          ),
+          currentDirection: committedDirection,
+          snakeLocation: nextSnakeLocation,
+          directionCandidate: null,
         };
       }
 
       if (action.type === "turn") {
         return {
           ...acc,
-          direction: action.direction,
-          axis: action.axis,
+          directionCandidate: {
+            axis: ["ArrowDown", "ArrowUp"].includes(action.payload as string)
+              ? "y"
+              : "x",
+            direction: ["ArrowLeft", "ArrowUp"].includes(
+              action.payload as string
+            )
+              ? -1
+              : 1,
+          },
         };
       }
 
       return acc;
     },
     {
-      direction: 1,
-      axis: "x",
+      currentDirection: {
+        direction: 1,
+        axis: "x",
+      },
+      directionCandidate: null,
       snakeLocation: [
         { x: 10, y: 10 },
         { x: 11, y: 10 },
@@ -105,14 +85,10 @@ const snake$ = merge(
         { x: 13, y: 10 },
         { x: 14, y: 10 },
       ],
-    } as { axis: Axis; direction: Direction; snakeLocation: Location[] }
-  )
-);
-
-const game$ = snake$.pipe(
-  tap((v) => {
-    render(v.snakeLocation);
-  })
+    }
+  ),
+  pluck("snakeLocation"),
+  tap(render)
 );
 
 game$.subscribe();

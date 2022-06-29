@@ -23,3 +23,14 @@ export const isOppositeDirections = (dir1: Direction, dir2: Direction) => {
 
   return dir1 !== dir2;
 };
+
+export const isValidTurn = (
+  { axis: axis1, direction: direction1 }: { axis: Axis; direction: Direction },
+  { axis: axis2, direction: direction2 }: { axis: Axis; direction: Direction }
+): boolean => {
+  if (isOppositeAxes(axis1, axis2)) {
+    return true;
+  }
+
+  return direction1 === direction2;
+};

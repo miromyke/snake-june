@@ -4,65 +4,29 @@ import {
   fromEvent,
   pluck,
   scan,
-  startWith,
   tap,
+  merge,
+  map,
 } from "rxjs";
-import { Axis, Direction } from "./types";
+import { pauses$ } from "./gameClock";
 
-const keyboardArrows$ = fromEvent(document, "keydown").pipe(
-  filter((e: KeyboardEvent) =>
-    ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)
+export const keyboardArrows$ = merge(
+  fromEvent(document, "keydown").pipe(
+    filter((e: KeyboardEvent) =>
+      ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)
+    ),
+    tap((e) => e.preventDefault()),
+    map((e) => ({ key: e.key }))
   ),
-  tap((e) => e.preventDefault()),
-  pluck("key")
-);
-
-export const directions$ = keyboardArrows$.pipe(
+  pauses$
+).pipe(
   scan(
-    (prevState, key) => {
-      if (
-        key === "ArrowDown" &&
-        prevState.direction === -1 &&
-        prevState.axis === "y"
-      ) {
-        return prevState;
-      }
-
-      if (
-        key === "ArrowUp" &&
-        prevState.direction === 1 &&
-        prevState.axis === "y"
-      ) {
-        return prevState;
-      }
-
-      if (
-        key === "ArrowLeft" &&
-        prevState.direction === 1 &&
-        prevState.axis === "x"
-      ) {
-        return prevState;
-      }
-
-      if (
-        key === "ArrowRight" &&
-        prevState.direction === -1 &&
-        prevState.axis === "x"
-      ) {
-        return prevState;
-      }
-
-      return {
-        direction: ["ArrowDown", "ArrowRight"].includes(key) ? 1 : -1,
-        axis: ["ArrowDown", "ArrowUp"].includes(key) ? "y" : "x",
-      };
+    (prev, next) => {
+      return { ...prev, ...next };
     },
-    { direction: 1, axis: "x" }
+    { pause: null, key: null }
   ),
-  startWith<{ axis: Axis; direction: Direction }>({ direction: 1, axis: "x" }),
-  distinctUntilChanged(
-    (prevState, nextState) =>
-      prevState.axis === nextState.axis &&
-      prevState.direction === nextState.direction
-  )
+  distinctUntilChanged((prev, next) => prev.key === next.key),
+  filter(({ pause }) => !pause),
+  pluck("key")
 );

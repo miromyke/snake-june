@@ -8,34 +8,45 @@ import {
   scan,
   startWith,
   switchMap,
-  forkJoin,
+  share,
+  tap,
+  distinctUntilChanged,
 } from "rxjs";
 
-const pause$ = fromEvent(document, "keydown").pipe(
+const isPausedByDefault = true;
+const clockSpeed = 500;
+
+export const pauses$ = fromEvent(document, "keydown").pipe(
   filter((e: KeyboardEvent) => e.code === "Space"),
-  scan((prevState) => ({ pause: !prevState.pause }), { pause: false })
+  tap((e) => e.preventDefault()),
+  scan((prevState) => ({ pause: !prevState.pause }), {
+    pause: isPausedByDefault,
+  }),
+  share(),
+  startWith({ pause: isPausedByDefault })
 );
 
-export const gameClock$ = pause$.pipe(
-  startWith({ pause: false }),
+export const gameClock$ = pauses$.pipe(
   switchMap(({ pause }) => {
     if (pause) {
-      return of({ pause: true, incrementDuration: false });
+      return of({ pause: true, shouldTick: false });
     }
 
     return merge(
-      of({ pause: false, incrementDuration: false }),
-      interval(500).pipe(map(() => ({ pause: false, incrementDuration: true })))
+      interval(clockSpeed).pipe(map(() => ({ pause: false, shouldTick: true })))
     );
   }),
   scan(
-    ({ tick }, { pause, incrementDuration }) => ({
+    ({ tick }, { pause, shouldTick }) => ({
       pause,
-      tick: incrementDuration ? tick + 1 : tick,
+      tick: shouldTick ? tick + 1 : tick,
     }),
     {
       tick: 0,
-      pause: false,
     }
-  )
+  ),
+  distinctUntilChanged(
+    (prevState, nextState) => prevState.tick === nextState.tick
+  ),
+  share()
 );
