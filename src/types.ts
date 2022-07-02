@@ -11,6 +11,10 @@ export interface State {
 
 export type Location = { x: number; y: number };
 
+export type Location3D = Location & { face: string };
+
+export type Face = "top" | "bottom" | "right" | "left" | "front" | "back";
+
 export type Axis = "x" | "y";
 
 export interface Partition {

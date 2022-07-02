@@ -1,12 +1,13 @@
 import { map, merge, pluck, scan, tap } from "rxjs";
 import { keyboardArrows$ } from "./directions";
 import { gameClock$ } from "./gameClock";
-import { moveInGivenDirection } from "./move";
+import { moveSnake } from "./moveNext";
 import { createRenderer } from "./render";
-import { Axis, Direction, Location } from "./types";
+import { Axis, Direction, Location3D } from "./types";
 import { isValidTurn } from "./utils";
 
-const render = createRenderer(document.querySelector<HTMLDivElement>("#root"));
+const meshSize = 25;
+const render = createRenderer(25);
 
 const arrowKeyToDirection = (
   key: string
@@ -14,6 +15,15 @@ const arrowKeyToDirection = (
   axis: ["ArrowDown", "ArrowUp"].includes(key) ? "y" : "x",
   direction: ["ArrowLeft", "ArrowUp"].includes(key) ? -1 : 1,
 });
+
+const getDirectionQueue = (
+  directionQueue: { axis: Axis; direction: Direction }[],
+  key: string
+) => {
+  return directionQueue.length < 3
+    ? [...directionQueue, arrowKeyToDirection(key as string)]
+    : directionQueue;
+};
 
 const game$ = merge(
   gameClock$.pipe(map(({ tick }) => ({ payload: tick, type: "tick" }))),
@@ -24,7 +34,7 @@ const game$ = merge(
     {
       prevDirection: { axis: Axis; direction: Direction } | null;
       directionQueue: { axis: Axis; direction: Direction }[];
-      snakeLocation: Location[];
+      snakeLocation: Location3D[];
     }
   >(
     (acc, action) => {
@@ -32,10 +42,10 @@ const game$ = merge(
         const [nextDirection, ...nextDirectionQueue] = acc.directionQueue;
 
         if (!nextDirection) {
-          const nextSnakeLocation = moveInGivenDirection(
+          const nextSnakeLocation = moveSnake(
             acc.snakeLocation,
-            acc.prevDirection.axis,
-            acc.prevDirection.direction
+            acc.prevDirection,
+            meshSize
           );
           return {
             ...acc,
@@ -44,10 +54,10 @@ const game$ = merge(
         }
 
         if (!isValidTurn(acc.prevDirection, nextDirection)) {
-          const nextSnakeLocation = moveInGivenDirection(
+          const nextSnakeLocation = moveSnake(
             acc.snakeLocation,
-            acc.prevDirection.axis,
-            acc.prevDirection.direction
+            acc.prevDirection,
+            meshSize
           );
           return {
             ...acc,
@@ -56,10 +66,10 @@ const game$ = merge(
           };
         }
 
-        const nextSnakeLocation = moveInGivenDirection(
+        const nextSnakeLocation = moveSnake(
           acc.snakeLocation,
-          nextDirection.axis,
-          nextDirection.direction
+          nextDirection,
+          meshSize
         );
 
         return {
@@ -73,13 +83,10 @@ const game$ = merge(
       if (action.type === "turn") {
         return {
           ...acc,
-          directionQueue:
-            acc.directionQueue.length < 3
-              ? [
-                  ...acc.directionQueue,
-                  arrowKeyToDirection(action.payload as string),
-                ]
-              : acc.directionQueue,
+          directionQueue: getDirectionQueue(
+            acc.directionQueue,
+            action.payload as string
+          ),
         };
       }
 
@@ -87,16 +94,15 @@ const game$ = merge(
     },
     {
       prevDirection: {
-        direction: 1,
-        axis: "x",
+        direction: -1,
+        axis: "y",
       },
       directionQueue: [],
       snakeLocation: [
-        { x: 10, y: 10 },
-        { x: 11, y: 10 },
-        { x: 12, y: 10 },
-        { x: 13, y: 10 },
-        { x: 14, y: 10 },
+        { x: 1, y: 3, face: "front" },
+        { x: 1, y: 4, face: "front" },
+        { x: 1, y: 5, face: "front" },
+        { x: 1, y: 6, face: "front" },
       ],
     }
   ),

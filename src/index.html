@@ -12,17 +12,79 @@
 
       :root {
         --mesh-size: 25;
-        --cell-size: 35px;
+        --cell-size: 21px;
         --main-bg: white;
         --alt-bg: rgb(226, 255, 194);
+        --mesh-width: calc(var(--mesh-size) * var(--cell-size));
+        --mesh-3d-gutter: calc(var(--mesh-size) * var(--cell-size) / 2);
+      }
+
+      #root {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .mesh-cube {
+        width: var(--mesh-width);
+        height: var(--mesh-width);
+        transform-style: preserve-3d;
+        transform: rotate3d(-10, 4, -4, 55deg);
+        transition: transform 0.2s ease-in;
+      }
+
+      .mesh-cube[data-face^="front"] {
+        transform: rotate3d(1, 1, 1, 0deg);
+      }
+
+      .mesh-cube[data-face^="top"] {
+        transform: rotate3d(180, 1, 1, -70deg);
+        /* from front to top */
+      }
+
+      .mesh-cube[data-face^="back"] {
+        transform: rotate3d(180, 1, 1, -172deg);
+        /* from top to back */
+      }
+
+      .mesh-cube[data-face^="bottom"] {
+        transform: rotate3d(180, 1, 1, -265deg);
+        /* from back to bottom */
+      }
+
+      .mesh-front {
+        transform: translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-back {
+        transform: rotateY(180deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-right {
+        transform: rotateY(90deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-left {
+        transform: rotateY(-90deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-top {
+        transform: rotateX(90deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-bottom {
+        transform: rotateX(-90deg) translateZ(var(--mesh-3d-gutter));
       }
 
       .mesh {
         display: grid;
-        margin: 0 auto;
         width: calc(var(--mesh-size) * var(--cell-size));
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
         border: 1px solid var(--alt-bg);
+        position: absolute;
+        backface-visibility: inherit;
       }
       .mesh > div {
         width: var(--cell-size);
@@ -37,11 +99,11 @@
       .mesh > div > div.occupied {
         background-color: green;
         border-radius: 3px;
-        width: 27px;
-        height: 27px;
+        width: calc(var(--cell-size) - 4px);
+        height: calc(var(--cell-size) - 4px);
       }
     </style>
-    <div id="root" class="mesh"></div>
+    <div id="root"></div>
     <script type="module" src="./index.ts"></script>
   </body>
 </html>
