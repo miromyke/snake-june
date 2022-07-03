@@ -14,7 +14,7 @@ import {
 } from "rxjs";
 
 const isPausedByDefault = true;
-const clockSpeed = 500;
+const clockSpeed = 300;
 
 export const pauses$ = fromEvent(document, "keydown").pipe(
   filter((e: KeyboardEvent) => e.code === "Space"),

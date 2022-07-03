@@ -5,19 +5,17 @@ const isOverreach = (
   direction: { axis: Axis; direction: Direction },
   mapSize: number
 ): boolean => {
-  if (head.face === "front") {
-    if (direction.axis === "x") {
-      const diffX = head.x + direction.direction;
-      if (diffX > mapSize - 2 || diffX < 0) {
-        return true;
-      }
+  if (direction.axis === "x") {
+    const nextX = head.x + direction.direction;
+    if (nextX >= mapSize || nextX < 0) {
+      return true;
     }
+  }
 
-    if (direction.axis === "y") {
-      const diffY = head.y + direction.direction;
-      if (diffY > mapSize - 2 || diffY < 0) {
-        return true;
-      }
+  if (direction.axis === "y") {
+    const nextY = head.y + direction.direction;
+    if (nextY >= mapSize || nextY < 0) {
+      return true;
     }
   }
 
@@ -60,59 +58,183 @@ export const moveSnake = (
 
   if (head.face === "front") {
     if (nextDirection.axis === "x") {
-      const diffX = head.x + nextDirection.direction;
+      const nextX = head.x + nextDirection.direction;
 
-      if (diffX > mapSize - 2) {
+      if (nextX >= mapSize) {
         // overreach to the right
         return [...nextSnake, { x: 0, y: head.y, face: "right" }];
       }
 
-      if (diffX < 0) {
+      if (nextX < 0) {
         // overreach to the left
         return [...nextSnake, { x: mapSize - 1, y: head.y, face: "left" }];
       }
     }
 
     if (nextDirection.axis === "y") {
-      const diffY = head.y + nextDirection.direction;
+      const nextY = head.y + nextDirection.direction;
 
-      if (diffY < 0) {
+      if (nextY < 0) {
         return [...nextSnake, { x: head.x, y: mapSize - 1, face: "top" }];
       }
 
-      if (diffY > mapSize - 2) {
+      if (nextY >= mapSize) {
         // overreach to the left
         return [...nextSnake, { x: head.x, y: 0, face: "bottom" }];
       }
     }
   }
 
-  return snake;
-};
+  if (head.face === "back") {
+    if (nextDirection.axis === "x") {
+      const nextX = head.x + nextDirection.direction;
 
-const directions = {
-  front: {
-    right: "right",
-    left: "left",
-    top: "top",
-    bottom: "bottom",
-  },
-  top: {
-    right: "right",
-    left: "left",
-    top: "back",
-    bottom: "front",
-  },
-  back: {
-    right: "right",
-    left: "left",
-    top: "bottom",
-    bottom: "top",
-  },
-  bottom: {
-    right: "right",
-    left: "left",
-    top: "bottom",
-    bottom: "top",
-  },
+      if (nextX >= mapSize) {
+        // overreach to the right
+        return [...nextSnake, { x: 0, y: head.y, face: "right" }];
+      }
+
+      if (nextX < 0) {
+        // overreach to the left
+        return [...nextSnake, { x: mapSize - 1, y: head.y, face: "left" }];
+      }
+    }
+
+    if (nextDirection.axis === "y") {
+      const nextY = head.y + nextDirection.direction;
+
+      if (nextY < 0) {
+        return [...nextSnake, { x: head.x, y: mapSize - 1, face: "top" }];
+      }
+
+      if (nextY >= mapSize) {
+        // overreach to the left
+        return [...nextSnake, { x: head.x, y: 0, face: "bottom" }];
+      }
+    }
+  }
+
+  if (head.face === "top") {
+    if (nextDirection.axis === "x") {
+      const nextX = head.x + nextDirection.direction;
+
+      if (nextX >= mapSize) {
+        // overreach to the right
+        return [...nextSnake, { x: mapSize - 1 - head.y, y: 0, face: "right" }];
+      }
+
+      if (nextX < 0) {
+        // overreach to the left
+        return [...nextSnake, { x: head.y, y: 0, face: "left" }];
+      }
+    }
+
+    if (nextDirection.axis === "y") {
+      const nextY = head.y + nextDirection.direction;
+
+      if (nextY < 0) {
+        return [...nextSnake, { x: mapSize - head.x + 1, y: 0, face: "back" }];
+      }
+
+      if (nextY >= mapSize) {
+        // overreach to the left
+        return [...nextSnake, { x: head.x, y: 0, face: "front" }];
+      }
+    }
+  }
+
+  if (head.face === "right") {
+    if (nextDirection.axis === "x") {
+      const nextX = head.x + nextDirection.direction;
+
+      if (nextX >= mapSize) {
+        // overreach to the right
+        return [...nextSnake, { x: 0, y: head.y, face: "back" }];
+      }
+
+      if (nextX < 0) {
+        // overreach to the left
+        return [...nextSnake, { y: head.y, x: mapSize - 1, face: "front" }];
+      }
+    }
+
+    if (nextDirection.axis === "y") {
+      const nextY = head.y + nextDirection.direction;
+
+      if (nextY < 0) {
+        return [
+          ...nextSnake,
+          { x: mapSize - 1, y: mapSize - head.x - 1, face: "top" },
+        ];
+      }
+
+      if (nextY >= mapSize) {
+        // overreach to the left
+        return [...nextSnake, { x: head.x, y: 0, face: "bottom" }];
+      }
+    }
+  }
+
+  if (head.face === "left") {
+    if (nextDirection.axis === "x") {
+      const nextX = head.x + nextDirection.direction;
+
+      if (nextX >= mapSize) {
+        return [...nextSnake, { x: 0, y: head.y, face: "front" }];
+      }
+
+      if (nextX < 0) {
+        return [...nextSnake, { y: head.y, x: mapSize - 1, face: "back" }];
+      }
+    }
+
+    if (nextDirection.axis === "y") {
+      const nextY = head.y + nextDirection.direction;
+
+      if (nextY < 0) {
+        return [...nextSnake, { x: 0, y: head.x, face: "top" }];
+      }
+
+      if (nextY >= mapSize) {
+        return [
+          ...nextSnake,
+          { x: 0, y: mapSize - 1 - head.x, face: "bottom" },
+        ];
+      }
+    }
+  }
+
+  if (head.face === "bottom") {
+    if (nextDirection.axis === "x") {
+      const nextX = head.x + nextDirection.direction;
+
+      if (nextX >= mapSize) {
+        return [...nextSnake, { x: head.y, y: mapSize - 1, face: "right" }];
+      }
+
+      if (nextX < 0) {
+        return [
+          ...nextSnake,
+          { y: mapSize - 1, x: mapSize - 1 - head.y, face: "left" },
+        ];
+      }
+    }
+
+    if (nextDirection.axis === "y") {
+      const nextY = head.y + nextDirection.direction;
+
+      if (nextY < 0) {
+        return [...nextSnake, { x: head.x, y: mapSize - 1, face: "front" }];
+      }
+
+      if (nextY >= mapSize) {
+        return [
+          ...nextSnake,
+          { x: mapSize - 1 - head.x, y: mapSize - 1, face: "back" },
+        ];
+      }
+    }
+  }
+
+  return snake;
 };

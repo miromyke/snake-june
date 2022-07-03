@@ -18,6 +18,8 @@ const createFace = (meshSize: number, face: Face) => {
     const yCoord = Math.floor(idx / meshSize);
 
     const loc = locToStr({ x: xCoord, y: yCoord });
+    meshNode.dataset.location = loc;
+
     meshNodes[loc] = meshNode;
 
     const snakeNode = document.createElement("div");

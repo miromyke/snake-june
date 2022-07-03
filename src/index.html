@@ -31,7 +31,6 @@
         width: var(--mesh-width);
         height: var(--mesh-width);
         transform-style: preserve-3d;
-        transform: rotate3d(-10, 4, -4, 55deg);
         transition: transform 0.2s ease-in;
       }
 
@@ -45,13 +44,21 @@
       }
 
       .mesh-cube[data-face^="back"] {
-        transform: rotate3d(180, 1, 1, -172deg);
+        transform: rotate3d(135, -9, 11, 141deg);
         /* from top to back */
       }
 
       .mesh-cube[data-face^="bottom"] {
-        transform: rotate3d(180, 1, 1, -265deg);
+        transform: rotate3d(27, 40, 35, 100deg);
         /* from back to bottom */
+      }
+
+      .mesh-cube[data-face^="right"] {
+        transform: rotate3d(1, 100, -20, -70deg);
+      }
+
+      .mesh-cube[data-face^="left"] {
+        transform: rotate3d(5, 50, 0, 55deg);
       }
 
       .mesh-front {

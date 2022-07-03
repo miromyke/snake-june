@@ -11,7 +11,7 @@ export interface State {
 
 export type Location = { x: number; y: number };
 
-export type Location3D = Location & { face: string };
+export type Location3D = Location & { face: Face };
 
 export type Face = "top" | "bottom" | "right" | "left" | "front" | "back";
 
