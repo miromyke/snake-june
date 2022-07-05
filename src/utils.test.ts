@@ -1,9 +1,9 @@
-import { isValidTurn } from "./utils";
+import { canMoveNext } from "./utils";
 
 describe("isValidTurn", () => {
   it("should not allow moving back", () => {
     expect(
-      isValidTurn(
+      canMoveNext(
         {
           axis: "x",
           direction: 1,
@@ -16,7 +16,7 @@ describe("isValidTurn", () => {
     ).toBe(false);
 
     expect(
-      isValidTurn(
+      canMoveNext(
         {
           axis: "y",
           direction: 1,
@@ -29,7 +29,7 @@ describe("isValidTurn", () => {
     ).toBe(false);
 
     expect(
-      isValidTurn(
+      canMoveNext(
         {
           axis: "y",
           direction: 1,
@@ -42,7 +42,7 @@ describe("isValidTurn", () => {
     ).toBe(true);
 
     expect(
-      isValidTurn(
+      canMoveNext(
         {
           axis: "x",
           direction: 1,

@@ -111,7 +111,13 @@ export const createRenderer = (meshSize: number) => {
       });
     });
 
-    board.container.dataset.face = snake[snake.length - 1].face;
+    const headFace = snake[snake.length - 1].face;
+    board.container.dataset.face = headFace;
+    const prevFace = snake
+      .slice(0, snake.length - 1)
+      .reverse()
+      .find(({ face }) => face !== headFace)?.face;
+    board.container.dataset.prevFace = prevFace ?? "";
   }
   return render;
 };

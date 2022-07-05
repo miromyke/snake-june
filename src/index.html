@@ -12,7 +12,7 @@
 
       :root {
         --mesh-size: 25;
-        --cell-size: 21px;
+        --cell-size: 20px;
         --main-bg: white;
         --alt-bg: rgb(226, 255, 194);
         --mesh-width: calc(var(--mesh-size) * var(--cell-size));
@@ -37,52 +37,130 @@
       .mesh-cube[data-face^="front"] {
         transform: rotate3d(1, 1, 1, 0deg);
       }
+      .mesh-cube[data-face^="front"][data-prev-face^="top"] {
+        transform: rotate3d(6, 9, 0, -30deg);
+      }
+      .mesh-cube[data-face^="front"][data-prev-face^="right"] {
+        transform: rotate3d(90, 150, 0, -15deg);
+      }
 
       .mesh-cube[data-face^="top"] {
-        transform: rotate3d(180, 1, 1, -70deg);
-        /* from front to top */
+        transform: rotate3d(1, 0, 0, -90deg);
+      }
+      .mesh-cube[data-face^="top"][data-prev-face^="right"] {
+        transform: rotate3d(6, 1, 1, -100deg);
+      }
+      .mesh-cube[data-face^="top"][data-prev-face^="back"] {
+        transform: rotate3d(201, 10, 12, 249deg);
       }
 
       .mesh-cube[data-face^="back"] {
-        transform: rotate3d(135, -9, 11, 141deg);
-        /* from top to back */
+        transform: rotate3d(0, 1, 0, 180deg);
+      }
+      .mesh-cube[data-face^="back"][data-prev-face^="right"] {
+        transform: rotate3d(2, 115, -9, 198deg);
+      }
+      .mesh-cube[data-face^="back"][data-prev-face^="bottom"] {
+        transform: rotate3d(49, 0, 4, 160deg);
+      }
+      .mesh-cube[data-face^="back"][data-prev-face^="top"] {
+        transform: rotate3d(201, 10, 12, 249deg);
       }
 
       .mesh-cube[data-face^="bottom"] {
-        transform: rotate3d(27, 40, 35, 100deg);
-        /* from back to bottom */
+        transform: rotate3d(1, 0, 0, 90deg);
+      }
+      .mesh-cube[data-face^="bottom"][data-prev-face^="front"] {
+        transform: rotate3d(55, 15, -18, 84deg);
+      }
+      .mesh-cube[data-face^="bottom"][data-prev-face^="left"] {
+        transform: rotate3d(55, 15, -18, 84deg);
+      }
+      .mesh-cube[data-face^="bottom"][data-prev-face^="right"] {
+        transform: rotate3d(47, -4, 4, 104deg);
+      }
+      .mesh-cube[data-face^="bottom"][data-prev-face^="back"] {
+        transform: rotate3d(49, -4, 4, 101deg);
       }
 
       .mesh-cube[data-face^="right"] {
-        transform: rotate3d(1, 100, -20, -70deg);
+        transform: rotate3d(5, 101, -5, 275deg);
+      }
+      .mesh-cube[data-face^="right"][data-prev-face^="front"] {
+        transform: rotate3d(18, 200, -15, -74deg);
+      }
+      .mesh-cube[data-face^="right"][data-prev-face^="bottom"] {
+        transform: rotate3d(-5, 86, 3, -75deg);
+      }
+      .mesh-cube[data-face^="right"][data-prev-face^="back"] {
+        transform: rotate3d(12, 109, -11, 241deg);
       }
 
       .mesh-cube[data-face^="left"] {
         transform: rotate3d(5, 50, 0, 55deg);
+      }
+      .mesh-cube[data-face^="left"][data-prev-face^="back"] {
+        transform: rotate3d(5, 85, 5, 108deg);
       }
 
       .mesh-front {
         transform: translateZ(var(--mesh-3d-gutter));
       }
 
+      .mesh-front::before {
+        content: "front";
+        font-size: 20px;
+        position: absolute;
+      }
+
       .mesh-back {
         transform: rotateY(180deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-back::before {
+        content: "back";
+        font-size: 20px;
+        position: absolute;
       }
 
       .mesh-right {
         transform: rotateY(90deg) translateZ(var(--mesh-3d-gutter));
       }
 
+      .mesh-right::before {
+        content: "right";
+        font-size: 20px;
+        position: absolute;
+      }
+
       .mesh-left {
         transform: rotateY(-90deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-left::before {
+        content: "left";
+        font-size: 20px;
+        position: absolute;
       }
 
       .mesh-top {
         transform: rotateX(90deg) translateZ(var(--mesh-3d-gutter));
       }
 
+      .mesh-top::before {
+        content: "top";
+        font-size: 20px;
+        position: absolute;
+      }
+
       .mesh-bottom {
         transform: rotateX(-90deg) translateZ(var(--mesh-3d-gutter));
+      }
+
+      .mesh-bottom::before {
+        content: "bottom";
+        font-size: 20px;
+        position: absolute;
       }
 
       .mesh {
@@ -97,7 +175,7 @@
         width: var(--cell-size);
         height: var(--cell-size);
         background-color: white;
-        padding: 4px;
+        padding: 2px;
       }
       .mesh > div:nth-child(2n) {
         background-color: var(--alt-bg);
