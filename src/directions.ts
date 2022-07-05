@@ -1,13 +1,4 @@
-import {
-  distinctUntilChanged,
-  filter,
-  fromEvent,
-  pluck,
-  scan,
-  tap,
-  merge,
-  map,
-} from "rxjs";
+import { filter, fromEvent, pluck, scan, tap, merge, map } from "rxjs";
 import { pauses$ } from "./gameClock";
 
 export const keyboardArrows$ = merge(
@@ -26,7 +17,6 @@ export const keyboardArrows$ = merge(
     },
     { pause: null, key: null }
   ),
-  distinctUntilChanged((prev, next) => prev.key === next.key),
-  filter(({ pause }) => !pause),
+  filter(({ pause, key }) => !pause && !!key),
   pluck("key")
 );
