@@ -75,13 +75,13 @@ export const renderBoard = (meshSize: number): Board => {
   };
 };
 
-export const createRenderer = (meshSize: number) => {
+export const createRenderer = (meshSize: number, root: string) => {
   let board: Board;
 
   function render(snake: Location3D[]) {
     if (!board) {
       board = renderBoard(meshSize);
-      document.querySelector("#root").appendChild(board.container);
+      document.querySelector(root).appendChild(board.container);
       render(snake);
       return;
     }

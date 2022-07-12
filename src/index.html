@@ -19,14 +19,6 @@
         --mesh-3d-gutter: calc(var(--mesh-size) * var(--cell-size) / 2);
       }
 
-      #root {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100vw;
-        height: 100vh;
-      }
-
       .mesh-cube {
         width: var(--mesh-width);
         height: var(--mesh-width);
@@ -187,8 +179,30 @@
         width: calc(var(--cell-size) - 4px);
         height: calc(var(--cell-size) - 4px);
       }
+
+      .split-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .player-screen {
+        width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .player-screen + .player-screen {
+        border-left: 1px solid gainsboro;
+      }
     </style>
-    <div id="root"></div>
+    <div class="split-screen">
+      <div id="player1" class="player-screen"></div>
+      <div id="player2" class="player-screen"></div>
+    </div>
     <script type="module" src="./index.ts"></script>
   </body>
 </html>

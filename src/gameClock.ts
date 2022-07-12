@@ -37,14 +37,14 @@ const clockSpeed$ = merge(
 ).pipe(
   map((key) => {
     if (key === "keyup") {
-      return { clockSpeed: 300 };
+      return { clockSpeed: 150 };
     }
 
     if (key === "keydown") {
       return { clockSpeed: 150 };
     }
   }),
-  startWith({ clockSpeed: 300 })
+  startWith({ clockSpeed: 150 })
 );
 
 export const gameClock$ = merge(pauses$, clockSpeed$).pipe(
